@@ -13,8 +13,12 @@ intents = dicord.Intents.default()
 intents.message_content = True
 intents.reactions = True
 
+# Emoji variables
 turtleRaw = "🐢"
 turteUnicode = "\U0001F422"
+
+# Twitter/Snowflake decoder variables
+twitterEpoch = 1288834974657
 
 client = discord.Client(intents=intents)
 
