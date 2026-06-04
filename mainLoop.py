@@ -28,7 +28,7 @@ tweetsHeap = []
 seenTweets = set()
 
 
-# Used to prune the Heap. If a week old removes.
+# Used to prune the Heap. If a week old removes from both data structures.
 def removeOldTweets():
     # Get the current time epoch. (Secs)
     currTime_epoch = datetime.now().timestamp()
