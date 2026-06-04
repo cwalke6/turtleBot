@@ -32,8 +32,9 @@ turteUnicode = "\U0001F422"
 # Twitter/Snowflake decoder variables
 twitterEpoch_ms = 1288834974657
 regexPattern = r"(\d+)"
-link = "https://x.com/jttojaybee/status/2056582358741004331"
-# link = "https://x.com/nikotaughtyou/status/2051052445107696107?s=46&t=Qe4miad8z-AUeQphNY5Skw"
+#link = "https://x.com/cookiecastleee/status/2062167289072615610?s=20"
+# link = "https://x.com/jttojaybee/status/2056582358741004331"
+link = "https://x.com/nikotaughtyou/status/2051052445107696107?s=46&t=Qe4miad8z-AUeQphNY5Skw"
 # Heap to store (timestamp of tweets (ms), last 22 bits of snowflake)
 tweetsHeap = []
 seenTweets = set() 
