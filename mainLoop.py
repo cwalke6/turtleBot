@@ -26,7 +26,7 @@ turtleUnicode = "\U0001F422"
 # Twitter/Snowflake decoder variables
 twitterEpoch_ms = 1288834974657
 regexPattern = r"(\d+)"
-secondsinWeek = 6040800
+secondsInWeek = 604800
 
 # Data structures to store tweets.
 # Heap stores (timestamp of tweets (s), last 22 bits of snowflake)
@@ -39,6 +39,8 @@ def removeOldTweets():
     # Get the current time epoch. (Secs)
     currTime_epoch = datetime.now().timestamp()
 
+    if(tweetsHeap):
+        print(f"{currTime_epoch - tweetsHeap[0][0]} {secondsInWeek}")
     while tweetsHeap and (currTime_epoch - (tweetsHeap[0][0])) > secondsInWeek:
         print(f"[mainLoop::removeOldTweets] Tweet is a week old. Removing")
         tweetToRemove = heapq.heappop(tweetsHeap)
@@ -60,6 +62,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    removeOldTweets()
     turtleSend = False
     # Check if the message is a link
     if("https://" in message.content and checkMessage(message.content)):
@@ -72,12 +75,15 @@ async def on_message(message):
             tweetTimestamp_ms = snowflakeID >> 22
             tweetTimestamp_ms = tweetTimestamp_ms + twitterEpoch_ms
             tweetTimestamp_s = tweetTimestamp_ms / 1000
-            if snowflakeID not in seenTweets:
-                seenTweets.add(snowflakeID)
-                heapq.heappush(tweetsHeap, (tweetTimestamp_s, snowflakeID))
+            if(tweetTimestamp_s < secondsInWeek):
+                if snowflakeID not in seenTweets:
+                    seenTweets.add(snowflakeID)
+                    heapq.heappush(tweetsHeap, (tweetTimestamp_s, snowflakeID))
+                else:
+                    print(f"[mainLoop::on_message]: Seen Tweet")
+                    turtleSend = True
             else:
-                print(f"[mainLoop::on_message]: Seen Tweet")
-                turtleSend = True
+                print(f"[mainLoop::on_message]: Tweet is too old. Not adding.")
 
     # Action.
     if(not turtleSend):
