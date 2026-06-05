@@ -62,7 +62,7 @@ async def on_message(message):
     turtleSend = False
     # Check if the message is a link
     if("https://" in message.content and checkMessage(message.content)):
-        print(f"[mainLoop::on_message]: message has x.com in it.")
+        print(f"[mainLoop::on_message]: message is a twitter link.")
         match = re.search(regexPattern, message.content)
         if match:
             print(f"[mainLoop::on_message]: Snowflake ID of link: {match.group()}")
@@ -83,7 +83,6 @@ async def on_message(message):
         return
 
     await message.add_reaction(turtleUnicode)
-    await message.channel.send("@dabes is a fat cow!")
 
 # To be imported from a .gitignore file.
 client.run(DISCORD_API_TOKEN)
