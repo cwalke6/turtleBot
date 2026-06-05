@@ -45,7 +45,7 @@ def removeOldTweets():
         seenTweets.remove(tweetToRemove[1])
 
 def checkMessage(message):
-    twitterLinks = ["x.com", "twitter.com", "vxtwitter.com", "fixupx.com"]
+    twitterLinks = ["x.com", "twitter.com", "fixupx.com"]
     for link in twitterLinks:
         if link in message:
             return True
@@ -83,6 +83,7 @@ async def on_message(message):
         return
 
     await message.add_reaction(turtleUnicode)
+    await message.channel.send("@dabes is a fat cow!")
 
 # To be imported from a .gitignore file.
 client.run(DISCORD_API_TOKEN)
