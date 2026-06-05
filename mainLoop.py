@@ -45,7 +45,7 @@ def removeOldTweets():
         seenTweets.remove(tweetToRemove[1])
 
 def checkMessage(message):
-    twitterLinks = ["x.com", "twitter.com", "fixupx.com"]
+    twitterLinks = ["x.com", "twitter.com"] 
     for link in twitterLinks:
         if link in message:
             return True
