@@ -39,8 +39,6 @@ def removeOldTweets():
     # Get the current time epoch. (Secs)
     currTime_epoch = datetime.now().timestamp()
 
-    if(tweetsHeap):
-        print(f"{currTime_epoch - tweetsHeap[0][0]} {secondsInWeek}")
     while tweetsHeap and (currTime_epoch - (tweetsHeap[0][0])) > secondsInWeek:
         print(f"[mainLoop::removeOldTweets] Tweet is a week old. Removing")
         tweetToRemove = heapq.heappop(tweetsHeap)
