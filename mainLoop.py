@@ -63,6 +63,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
     removeOldTweets()
+    currTime_epoch = datetime.now().timestamp()
     turtleSend = False
     # Check if the message is a link
     if("https://" in message.content and checkMessage(message.content)):
@@ -75,7 +76,7 @@ async def on_message(message):
             tweetTimestamp_ms = snowflakeID >> 22
             tweetTimestamp_ms = tweetTimestamp_ms + twitterEpoch_ms
             tweetTimestamp_s = tweetTimestamp_ms / 1000
-            if(tweetTimestamp_s < secondsInWeek):
+            if((currTime_epoch - tweetTimestamp_s) < secondsInWeek):
                 if snowflakeID not in seenTweets:
                     seenTweets.add(snowflakeID)
                     heapq.heappush(tweetsHeap, (tweetTimestamp_s, snowflakeID))
