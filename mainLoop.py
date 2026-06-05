@@ -7,18 +7,24 @@
 
 # x.com alternatives: fixupx, vxtwitter,
 
+import re
 import discord
+from datetime import datetime
+import heapq
 
-intents = dicord.Intents.default()
+with open("api_token.txt", "r") as f:
+    DISCORD_API_TOKEN = f.read().strip()
+
+intents = discord.Intents.default()
 intents.message_content = True
 intents.reactions = True
 
 # Emoji variables
 turtleRaw = "🐢"
-turteUnicode = "\U0001F422"
+turtleUnicode = "\U0001F422"
 
 # Twitter/Snowflake decoder variables
-twitterEpoch = 1288834974657
+twitterEpoch_ms = 1288834974657
 regexPattern = r"(\d+)"
 secondsinWeek = 6040800
 
@@ -38,6 +44,11 @@ def removeOldTweets():
         tweetToRemove = heapq.heappop(tweetsHeap)
         seenTweets.remove(tweetToRemove[1])
 
+def checkMessage(message):
+    twitterLinks = ["x.com", "twitter.com", "vxtwitter.com", "fixupx.com"]
+    for link in twitterLinks:
+        if link in message:
+            return True
 
 # Discord Logic
 client = discord.Client(intents=intents)
@@ -50,10 +61,7 @@ async def on_ready():
 async def on_message(message):
     turtleSend = False
     # Check if the message is a link
-    # TODO: Might be faster to just check if it is a link initially, then check substrings?
-    # I am sure there is some python helper function to check this. Or discord.
-    if("x.com" in message.content):
-        # TODO: Get an actual logger helper functions.
+    if("https://" in message.content and checkMessage(message.content)):
         print(f"[mainLoop::on_message]: message has x.com in it.")
         match = re.search(regexPattern, message.content)
         if match:
@@ -71,12 +79,10 @@ async def on_message(message):
                 turtleSend = True
 
     # Action.
-    if(!turtleSend):
+    if(not turtleSend):
         return
 
     await message.add_reaction(turtleUnicode)
-    await message.channel.send('That deserves a turtle!')
-
 
 # To be imported from a .gitignore file.
 client.run(DISCORD_API_TOKEN)
