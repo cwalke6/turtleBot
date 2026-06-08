@@ -9,6 +9,7 @@
 
 import re
 import discord
+from discord.ext import commands
 from datetime import datetime
 import heapq
 
@@ -18,6 +19,8 @@ with open("api_token.txt", "r") as f:
 intents = discord.Intents.default()
 intents.message_content = True
 intents.reactions = True
+
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 # Emoji variables
 turtleRaw = "🐢"
@@ -33,6 +36,8 @@ secondsInWeek = 604800
 tweetsHeap = []
 seenTweets = set()
 
+# Leaderboard Data Structure
+turtleLeaderboard = dict()
 
 # Used to prune the Heap. If a week old removes from both data structures.
 def removeOldTweets():
@@ -51,6 +56,12 @@ def checkMessage(message):
         if link in message:
             return True
 
+def updateLeaderboard(user):
+    if not user in turtleLeaderboard:
+        turtleLeaderboard[user] = 1
+    else:
+        turtleLeaderboard[user] += 1
+
 # Discord Logic
 client = discord.Client(intents=intents)
 
@@ -61,6 +72,29 @@ async def on_ready():
 @client.event
 async def on_message(message):
     removeOldTweets()
+
+    # Leaderboard Logic.
+    if message.content == "!turtleleaderboard":
+        print(f"[mainLoop::show_leaderboard]: Showing leaderboard.")
+        if not turtleLeaderboard:
+            await message.channel.send("No scores yet!")
+            return
+
+        sorted_scores = sorted(turtleLeaderboard.items(), key=lambda x: x[1], reverse=True)[:10]
+
+        medals = ["🥇", "🥈", "🥉"]
+        lines = []
+        for i, (username, score) in enumerate(sorted_scores):
+            prefix = medals[i] if i < 3 else f"`{i+1}.`"
+            lines.append(f"{prefix} **{username}** - {score} turtles")
+
+        embed = discord.Embed(
+            title="🏆 Leaderboard",
+            description="\n".join(lines),
+            color=discord.Color.gold()
+        )
+        await message.channel.send(embed=embed)
+
     currTime_epoch = datetime.now().timestamp()
     turtleSend = False
     # Check if the message is a link
@@ -81,6 +115,8 @@ async def on_message(message):
                 else:
                     print(f"[mainLoop::on_message]: Seen Tweet")
                     turtleSend = True
+                    # Have to add to leaderboard.
+                    updateLeaderboard(message.author)
             else:
                 print(f"[mainLoop::on_message]: Tweet is too old. Not adding.")
 
