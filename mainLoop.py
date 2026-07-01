@@ -11,6 +11,7 @@ import re
 import discord
 from datetime import datetime
 import heapq
+import sqlite3
 
 with open("api_token.txt", "r") as f:
     DISCORD_API_TOKEN = f.read().strip()
@@ -33,8 +34,9 @@ secondsInWeek = 604800
 tweetsHeap = []
 seenTweets = set()
 
-# Leaderboard Data Structure
-turtleLeaderboard = dict()
+# Leaderboard Database
+conn = sqlite3.connect("leaderboard.db")
+cursor = conn.cursor()
 
 # Used to prune the Heap. If a week old removes from both data structures.
 def removeOldTweets():
@@ -53,11 +55,13 @@ def checkMessage(message):
         if link in message:
             return True
 
-def updateLeaderboard(user):
-    if not user in turtleLeaderboard:
-        turtleLeaderboard[user] = 1
-    else:
-        turtleLeaderboard[user] += 1
+def updateLeaderboard(userID):
+    # 1. Create the table if it does not exist.
+        # a. Should also be within the persistent file? How do I load that in?
+    curr.execute("CREATE TABLE leaderboard (username TEXT UNIQUE, score INTEGER);")
+    # 2. Check if the user is in the data base's table
+    curr.execute("INSERT INTO leaderboard (user_id, score) VALUES (?, 1)
+                ON CONFLICT(user_id) DO UPDATE SET score = score + 1;")
 
 # Discord Logic
 client = discord.Client(intents=intents)
@@ -84,6 +88,8 @@ async def on_message(message):
         for i, (username, score) in enumerate(sorted_scores):
             prefix = medals[i] if i < 3 else f"`{i+1}.`"
             lines.append(f"{prefix} **{username}** - {score} turtles")
+            # need to use something like bot.get_user(user_id)
+            # since now in the database the user id will be stored not the username.
 
         embed = discord.Embed(
             title="🏆 Leaderboard",
@@ -113,7 +119,7 @@ async def on_message(message):
                     print(f"[mainLoop::on_message]: Seen Tweet")
                     turtleSend = True
                     # Have to add to leaderboard.
-                    updateLeaderboard(message.author)
+                    updateLeaderboard(message.author.id)
             else:
                 print(f"[mainLoop::on_message]: Tweet is too old. Not adding.")
 
