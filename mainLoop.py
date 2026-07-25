@@ -82,9 +82,10 @@ async def on_message(message):
         rows = cursor.fetchall()
         medals = ["🥇", "🥈", "🥉"]
         lines = []
-        for i in range(len(rows)):
+        for i, (user_id, score) in enumerate(rows):
+            user = await client.fetch_user(int(user_id))
             prefix = medals[i] if i < 3 else f"`{i+1}.`"
-            lines.append(f"{prefix} **{client.get_user(int(rows[i][0]))}** - {rows[i][1]} turtles")
+            lines.append(f"{prefix} **{user.display_name}** - {score} turtles")
             # need to use something like bot.get_user(user_id)
             # since now in the database the user id will be stored not the username.
 
