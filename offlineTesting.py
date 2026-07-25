@@ -31,7 +31,7 @@ turteUnicode = "\U0001F422"
 
 # Twitter/Snowflake decoder variables
 twitterEpoch_ms = 1288834974657
-regexPattern = r"(\d+)"
+regexPattern = r"status/(\d+)"
 #link = "https://x.com/cookiecastleee/status/2062167289072615610?s=20"
 # link = "https://x.com/jttojaybee/status/2056582358741004331"
 link = "https://x.com/nikotaughtyou/status/2051052445107696107?s=46&t=Qe4miad8z-AUeQphNY5Skw"
@@ -42,9 +42,10 @@ seenTweets = set()
 if("x.com" in link):
     print(f"[mainLoop::on_message]: message has x.com in it.")
     match = re.search(regexPattern, link)
+    print(f"Match string: ${match}")
     if match:
-        print(f"Here is the snowflake ID of the link: {match.group()}")
-        snowflakeID = int(match.group())
+        print(f"Here is the snowflake ID of the link: {match.group()[7:26]}")
+        snowflakeID = int(match.group()[7:26])
         machineID = snowflakeID & 0x3FFFFF
         print(f"machine ID: {machineID}")
         tweetTimestamp_ms = snowflakeID >> 22

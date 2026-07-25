@@ -26,7 +26,7 @@ turtleUnicode = "\U0001F422"
 
 # Twitter/Snowflake decoder variables
 twitterEpoch_ms = 1288834974657
-regexPattern = r"(\d+)"
+regexPattern = r"status/(\d+)"
 secondsInWeek = 604800
 
 # Data structures to store tweets.
@@ -58,10 +58,11 @@ def checkMessage(message):
 def updateLeaderboard(userID):
     # 1. Create the table if it does not exist.
         # a. Should also be within the persistent file? How do I load that in?
-    curr.execute("CREATE TABLE leaderboard (username TEXT UNIQUE, score INTEGER);")
+    cursor.execute("CREATE TABLE IF NOT EXISTS leaderboard (user_id TEXT UNIQUE, score INTEGER);")
     # 2. Check if the user is in the data base's table
-    curr.execute("INSERT INTO leaderboard (user_id, score) VALUES (?, 1)
-                ON CONFLICT(user_id) DO UPDATE SET score = score + 1;")
+    cursor.execute("""INSERT INTO leaderboard (user_id, score) VALUES (?, 1)
+                    "ON CONFLICT(user_id) DO UPDATE SET score = score + 1;""", (userID,))
+    conn.commit()
 
 # Discord Logic
 client = discord.Client(intents=intents)
@@ -77,17 +78,13 @@ async def on_message(message):
     # Leaderboard Logic.
     if message.content == "!turtleleaderboard":
         print(f"[mainLoop::show_leaderboard]: Showing leaderboard.")
-        if not turtleLeaderboard:
-            await message.channel.send("No scores yet!")
-            return
-
-        sorted_scores = sorted(turtleLeaderboard.items(), key=lambda x: x[1], reverse=True)[:10]
-
+        cursor.execute("SELECT user_id, score FROM leaderboard ORDER BY score DESC;")
+        rows = cursor.fetchall()
         medals = ["🥇", "🥈", "🥉"]
         lines = []
-        for i, (username, score) in enumerate(sorted_scores):
+        for i in range(len(rows)):
             prefix = medals[i] if i < 3 else f"`{i+1}.`"
-            lines.append(f"{prefix} **{username}** - {score} turtles")
+            lines.append(f"{prefix} **{client.get_user(int(rows[i][0]))}** - {rows[i][1]} turtles")
             # need to use something like bot.get_user(user_id)
             # since now in the database the user id will be stored not the username.
 
@@ -105,8 +102,8 @@ async def on_message(message):
         print(f"[mainLoop::on_message]: message is a twitter link.")
         match = re.search(regexPattern, message.content)
         if match:
-            print(f"[mainLoop::on_message]: Snowflake ID of link: {match.group()}")
-            snowflakeID = int(match.group())
+            print(f"[mainLoop::on_message]: Snowflake ID of link: {match.group()[7:26]}")
+            snowflakeID = int(match.group()[7:26])
             machineID = snowflakeID & 0x3FFFFF
             tweetTimestamp_ms = snowflakeID >> 22
             tweetTimestamp_ms = tweetTimestamp_ms + twitterEpoch_ms
