@@ -87,8 +87,6 @@ async def on_message(message):
             user = await client.fetch_user(int(user_id))
             prefix = medals[i] if i < 3 else f"`{i+1}.`"
             lines.append(f"{prefix} **{user.display_name}** - {score} turtles")
-            # need to use something like bot.get_user(user_id)
-            # since now in the database the user id will be stored not the username.
 
         embed = discord.Embed(
             title="🏆 Leaderboard",
@@ -118,7 +116,7 @@ async def on_message(message):
                     print(f"[mainLoop::on_message]: Seen Tweet, WOULD BE A TURTLE")
                     # turtleSend = True
                     # Have to add to leaderboard.
-                    # updateLeaderboard(message.author.id)
+                    updateLeaderboard(message.author.id)
             else:
                 print(f"[mainLoop::on_message]: Tweet is too old. Not adding.")
 
