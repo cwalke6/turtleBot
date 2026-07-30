@@ -115,7 +115,7 @@ async def on_message(message):
                     heapq.heappush(tweetsHeap, (tweetTimestamp_s, snowflakeID))
                 else:
                     logger.info(f"[on_message]: Seen Tweet, WOULD BE A TURTLE")
-                    # turtleSend = True
+                    turtleSend = True
                     # Have to add to leaderboard.
                     updateLeaderboard(message.author.id)
             else:
