@@ -60,9 +60,10 @@ def updateLeaderboard(userID):
     # 1. Create the table if it does not exist.
         # a. Should also be within the persistent file? How do I load that in?
     cursor.execute("CREATE TABLE IF NOT EXISTS leaderboard (user_id TEXT UNIQUE, score INTEGER);")
+    print(f"WOULD BE A TURTLE")
     # 2. Check if the user is in the data base's table
-    cursor.execute("INSERT INTO leaderboard (user_id, score) VALUES (?, 1) ON CONFLICT(user_id) DO UPDATE SET score = score + 1;", (userID,))
-    conn.commit()
+    # cursor.execute("INSERT INTO leaderboard (user_id, score) VALUES (?, 1) ON CONFLICT(user_id) DO UPDATE SET score = score + 1;", (userID,))
+    # conn.commit()
 
 # Discord Logic
 client = discord.Client(intents=intents)
