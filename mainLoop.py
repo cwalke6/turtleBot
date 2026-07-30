@@ -40,6 +40,7 @@ conn = sqlite3.connect("leaderboard.db")
 cursor = conn.cursor()
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(filename="turtlebot.log", level=logging.INFO)
 
 # Used to prune the Heap. If a week old removes from both data structures.
 def removeOldTweets():
