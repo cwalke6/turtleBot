@@ -101,6 +101,7 @@ async def on_message(message):
     # Check if the message is a link
     if("https://" in message.content and checkMessage(message.content)):
         logger.info(f"[on_message]: message is a twitter link.")
+        logger.info(f"[on_message]: raw message: {message.content}")
         match = re.search(regexPattern, message.content)
         if match:
             logger.info(f"[on_message]: Snowflake ID of link: {match.group()[7:26]}")
