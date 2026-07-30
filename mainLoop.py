@@ -39,13 +39,15 @@ seenTweets = set()
 conn = sqlite3.connect("leaderboard.db")
 cursor = conn.cursor()
 
+logger = logging.getLogger(__name__)
+
 # Used to prune the Heap. If a week old removes from both data structures.
 def removeOldTweets():
     # Get the current time epoch. (Secs)
     currTime_epoch = datetime.now().timestamp()
 
     while tweetsHeap and (currTime_epoch - (tweetsHeap[0][0])) > secondsInWeek:
-        print(f"[mainLoop::removeOldTweets] Tweet is a week old. Removing")
+        logger.info(f"[removeOldTweets]: Tweet is a week old. Removing")
         tweetToRemove = heapq.heappop(tweetsHeap)
         seenTweets.remove(tweetToRemove[1])
 
@@ -58,19 +60,17 @@ def checkMessage(message):
 
 def updateLeaderboard(userID):
     # 1. Create the table if it does not exist.
-        # a. Should also be within the persistent file? How do I load that in?
     cursor.execute("CREATE TABLE IF NOT EXISTS leaderboard (user_id TEXT UNIQUE, score INTEGER);")
-    print(f"WOULD BE A TURTLE")
     # 2. Check if the user is in the data base's table
-    # cursor.execute("INSERT INTO leaderboard (user_id, score) VALUES (?, 1) ON CONFLICT(user_id) DO UPDATE SET score = score + 1;", (userID,))
-    # conn.commit()
+    cursor.execute("INSERT INTO leaderboard (user_id, score) VALUES (?, 1) ON CONFLICT(user_id) DO UPDATE SET score = score + 1;", (userID,))
+    conn.commit()
 
 # Discord Logic
 client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready():
-    print(f"[mainLoop::on_ready()]: We have logged in as {client.user}")
+    logger.info(f"[mainLoop::on_ready()]: We have logged in as {client.user}")
 
 @client.event
 async def on_message(message):
@@ -78,7 +78,7 @@ async def on_message(message):
 
     # Leaderboard Logic.
     if message.content == "!turtleleaderboard":
-        print(f"[mainLoop::show_leaderboard]: Showing leaderboard.")
+        logger.info(f"[mainLoop::show_leaderboard]: Showing leaderboard.")
         cursor.execute("SELECT user_id, score FROM leaderboard ORDER BY score DESC;")
         rows = cursor.fetchall()
         medals = ["🥇", "🥈", "🥉"]
@@ -99,10 +99,10 @@ async def on_message(message):
     turtleSend = False
     # Check if the message is a link
     if("https://" in message.content and checkMessage(message.content)):
-        print(f"[mainLoop::on_message]: message is a twitter link.")
+        logger.info(f"[on_message]: message is a twitter link.")
         match = re.search(regexPattern, message.content)
         if match:
-            print(f"[mainLoop::on_message]: Snowflake ID of link: {match.group()[7:26]}")
+            logger.info(f"[on_message]: Snowflake ID of link: {match.group()[7:26]}")
             snowflakeID = int(match.group()[7:26])
             machineID = snowflakeID & 0x3FFFFF
             tweetTimestamp_ms = snowflakeID >> 22
@@ -113,12 +113,12 @@ async def on_message(message):
                     seenTweets.add(snowflakeID)
                     heapq.heappush(tweetsHeap, (tweetTimestamp_s, snowflakeID))
                 else:
-                    print(f"[mainLoop::on_message]: Seen Tweet, WOULD BE A TURTLE")
+                    logger.info(f"[on_message]: Seen Tweet, WOULD BE A TURTLE")
                     # turtleSend = True
                     # Have to add to leaderboard.
                     updateLeaderboard(message.author.id)
             else:
-                print(f"[mainLoop::on_message]: Tweet is too old. Not adding.")
+                logger.info(f"[on_message]: Tweet is too old. Not adding.")
 
     # Action.
     if(not turtleSend):
