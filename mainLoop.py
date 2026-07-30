@@ -12,6 +12,7 @@ import discord
 from datetime import datetime
 import heapq
 import sqlite3
+import logging
 
 with open("api_token.txt", "r") as f:
     DISCORD_API_TOKEN = f.read().strip()
@@ -60,8 +61,7 @@ def updateLeaderboard(userID):
         # a. Should also be within the persistent file? How do I load that in?
     cursor.execute("CREATE TABLE IF NOT EXISTS leaderboard (user_id TEXT UNIQUE, score INTEGER);")
     # 2. Check if the user is in the data base's table
-    cursor.execute("""INSERT INTO leaderboard (user_id, score) VALUES (?, 1)
-                    "ON CONFLICT(user_id) DO UPDATE SET score = score + 1;""", (userID,))
+    cursor.execute("INSERT INTO leaderboard (user_id, score) VALUES (?, 1) ON CONFLICT(user_id) DO UPDATE SET score = score + 1;", (userID,))
     conn.commit()
 
 # Discord Logic
@@ -114,10 +114,10 @@ async def on_message(message):
                     seenTweets.add(snowflakeID)
                     heapq.heappush(tweetsHeap, (tweetTimestamp_s, snowflakeID))
                 else:
-                    print(f"[mainLoop::on_message]: Seen Tweet")
-                    turtleSend = True
+                    print(f"[mainLoop::on_message]: Seen Tweet, WOULD BE A TURTLE")
+                    # turtleSend = True
                     # Have to add to leaderboard.
-                    updateLeaderboard(message.author.id)
+                    # updateLeaderboard(message.author.id)
             else:
                 print(f"[mainLoop::on_message]: Tweet is too old. Not adding.")
 
